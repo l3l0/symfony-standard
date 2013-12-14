@@ -2,6 +2,9 @@
 
 namespace Acme\DemoBundle\Controller;
 
+use Acme\DemoBundle\Form\FormData\Item;
+use Acme\DemoBundle\Form\FormData\Main;
+use Acme\DemoBundle\Form\MainType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Acme\DemoBundle\Form\ContactType;
@@ -9,49 +12,29 @@ use Acme\DemoBundle\Form\ContactType;
 // these import the "@Route" and "@Template" annotations
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Component\HttpFoundation\Request;
 
 class DemoController extends Controller
 {
     /**
-     * @Route("/", name="_demo")
+     * @Route("/item-form", name="_demo_hello")
      * @Template()
      */
-    public function indexAction()
+    public function helloAction(Request $request)
     {
-        return array();
-    }
+        $item1 = new Item('1');
+        $item2 = new Item('2');
+        $item3 = new Item('3');
 
-    /**
-     * @Route("/hello/{name}", name="_demo_hello")
-     * @Template()
-     */
-    public function helloAction($name)
-    {
-        return array('name' => $name);
-    }
-
-    /**
-     * @Route("/contact", name="_demo_contact")
-     * @Template()
-     */
-    public function contactAction()
-    {
-        $form = $this->get('form.factory')->create(new ContactType());
-
-        $request = $this->get('request');
-        if ($request->isMethod('POST')) {
-            $form->submit($request);
-            if ($form->isValid()) {
-                $mailer = $this->get('mailer');
-                // .. setup a message and send it
-                // http://symfony.com/doc/current/cookbook/email.html
-
-                $this->get('session')->getFlashBag()->set('notice', 'Message sent!');
-
-                return new RedirectResponse($this->generateUrl('_demo'));
-            }
+        $main = new Main([$item1, $item2, $item3]);
+        $form = $this->createForm(new MainType(), $main);
+        $form->handleRequest($request);
+        if ($form->isValid()) {
+            die('Is valid');
+        } else {
+            var_dump($form->getErrorsAsString());
         }
 
-        return array('form' => $form->createView());
+        return ['form' => $form->createView()];
     }
 }
