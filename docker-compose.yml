@@ -1,0 +1,33 @@
+version: '2'
+services:
+  web:
+    build: .
+    links:
+      - db
+    volumes:
+      - .:/var/www/symfony
+      - ./docker/php.ini:/usr/local/etc/php/php.ini
+
+  nginx:
+    image: nginx:1.9.3
+    links:
+      - web
+    volumes_from:
+      - web
+    volumes:
+      - ./docker/vhost.conf:/etc/nginx/conf.d/default.conf
+    expose:
+      - "80"
+    ports:
+      - "80:80"
+
+  db:
+    image: mysql:5.6
+    environment:
+      MYSQL_ROOT_PASSWORD: symfony
+      MYSQL_DATABASE: symfony
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - ./docker/db/my.cnf:/etc/mysql/my.cnf
